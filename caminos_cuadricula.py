@@ -81,13 +81,15 @@ def caminos_recursivo(m: int, n: int) -> int:
     #   Si m == 1 o n == 1, solo existe UN camino posible. ¿Por qué?
     #   (Pista: si solo hay una fila, el robot solo puede moverse a la derecha,
     #    sin elección. Lo mismo con una sola columna.)
-
+    if m==1:
+        return 1
+    if n==1:
+        return 1
+    
     # PASO 2 – Caso recursivo.
     #   Aplica la fórmula:  caminos(m, n) = caminos(m-1, n) + caminos(m, n-1)
     #   Es una sola línea de código.
-
-    pass  # TODO
-
+    return caminos_recursivo(m-1, n)+caminos_recursivo(m, n-1)
 
 def caminos_memo(m: int, n: int, memo: dict = None) -> int:
     """
@@ -109,9 +111,20 @@ def caminos_memo(m: int, n: int, memo: dict = None) -> int:
             4. Calcula recursivamente, guarda en memo[(m, n)], devuelve.
     """
     # Sigue los cuatro pasos descritos arriba.
+    if memo is None:
+        memo={}
+    
+    if m==1:
+        return 1
+    if n==1:
+        return 1
+    
+    if (m, n) in memo:
+        return memo[(m, n)]
+    
+    memo[(m, n)]=caminos_memo(m-1, n, memo)+caminos_memo(m, n-1, memo)
 
-    pass  # TODO
-
+    return memo[(m, n)]
 
 def caminos_bottom_up(m: int, n: int) -> tuple:
     """
@@ -142,19 +155,25 @@ def caminos_bottom_up(m: int, n: int) -> tuple:
     """
     # PASO 1 – Crea la tabla de m filas × n columnas llena de ceros.
     #   tabla = [[0] * n for _ in range(m)]
+    tabla=[[0]*n for _ in range(m)]
 
     # PASO 2 – Inicializa la primera fila.
     #   for j in range(n): tabla[0][j] = 1
+    for j in range(n):
+        tabla[0][j]=1
 
     # PASO 3 – Inicializa la primera columna.
     #   for i in range(m): tabla[i][0] = 1
+    for i in range(m):
+        tabla[i][0]=1
 
     # PASO 4 – Doble bucle de llenado (empieza en i=1, j=1).
+    for i in range(1, m):
+        for j in range(1, n):
+            tabla[i][j]=tabla[i-1][j]+tabla[i][j-1]
 
     # PASO 5 – Devuelve (tabla[m-1][n-1], tabla).
-
-    pass  # TODO  ← cuando implementes, cambia el return a (tabla[m-1][n-1], tabla)
-
+    return tabla[m-1][n-1], tabla
 
 def imprimir_tabla(tabla: list, titulo: str = "Tabla DP") -> None:
     """
@@ -178,13 +197,15 @@ def imprimir_tabla(tabla: list, titulo: str = "Tabla DP") -> None:
     # PASO 1 – Encuentra el valor máximo en toda la tabla.
     #   max_val = max(max(fila) for fila in tabla)
     #   ancho   = len(str(max_val)) + 1   (+ 1 para separación)
+    max_val=max(max(fila) for fila in tabla)
+    ancho=len(str(max_val))+1
 
     # PASO 2 – Imprime el título.
+    print(f"{titulo}")
 
     # PASO 3 – Recorre las filas e imprime cada valor con rjust(ancho).
-
-    pass  # TODO
-
+    for fila in tabla:
+        print(" "+" ".join(str(val).rjust(ancho) for val in fila))
 
 # ============================================================
 # PARTE 2B – CAMINOS CON OBSTÁCULOS
@@ -236,21 +257,37 @@ def caminos_con_obstaculos(grid: list) -> int:
     # PASO 1 – Verifica si el inicio o el destino están bloqueados.
     #   m, n = len(grid), len(grid[0])
     #   if grid[0][0] == 1 or grid[m-1][n-1] == 1: return 0
-
+    m, n=len(grid), len(grid[0])
+    if grid[0][0]==1 or grid[m-1][n-1]==1:
+        return 0
+    
     # PASO 2 – Crea la tabla de ceros.
+    tabla=[[0]*n for _ in range(m)]
 
     # PASO 3 – Inicializa la primera fila considerando obstáculos.
     #   Usa un bucle con break en cuanto encuentres un obstáculo.
+    for j in range(n):
+        if grid[0][j]==1:
+            break
+        tabla[0][j]=1
 
     # PASO 4 – Inicializa la primera columna considerando obstáculos.
+    for i in range(m):
+        if grid[i][0]==1:
+            break
+        tabla[i][0]=1
 
     # PASO 5 – Llena el interior (doble bucle desde i=1, j=1).
     #   Aplica la MODIFICACIÓN 2 descrita arriba.
+    for i in range(1, m):
+        for j in range(1, n):
+            if grid[i][j]==1:
+                tabla[i][j]=0
+            else:
+                tabla[i][j]=tabla[i-1][j]+tabla[i][j-1]
 
     # PASO 6 – Retorna tabla[m-1][n-1].
-
-    pass  # TODO
-
+    return tabla[m-1][n-1]
 
 # ============================================================
 # EXPERIMENTOS
