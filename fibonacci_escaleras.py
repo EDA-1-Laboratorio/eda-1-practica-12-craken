@@ -58,19 +58,24 @@ def fib_recursivo(n: int) -> int:
     #   ¿Qué pasa si alguien llama fib_recursivo(-3)?
     #   Lanza un ValueError con un mensaje que indique que n debe ser >= 0.
     #   Recuerda la sintaxis: raise ValueError("mensaje")
+    if n<0:
+        raise ValueError("Debe ser mayor o igual a 0")
 
     # PASO 2 – Casos base.
     #   Son los valores de los que ya conoces la respuesta sin recurrir.
     #   F(0) = 0  →  retorna 0 directamente.
     #   F(1) = 1  →  retorna 1 directamente.
     #   Sin casos base, la recursión no termina nunca.
+    if n==0:
+        return 0
+    if n==1:
+        return 1
 
     # PASO 3 – Caso recursivo.
     #   Para n >= 2, la respuesta depende de dos subproblemas más pequeños.
     #   Escribe exactamente la fórmula matemática como código Python.
     #   No intentes optimizarla todavía; la claridad es el objetivo aquí.
-
-    pass  # TODO: elimina este pass e implementa los tres pasos
+    return fib_recursivo(n-1)+fib_recursivo(n-2)
 
 
 def fib_memo(n: int, memo: dict = None) -> int:
@@ -101,25 +106,34 @@ def fib_memo(n: int, memo: dict = None) -> int:
     # PASO 1 – Inicialización del diccionario.
     #   Si memo es None, asígnale un diccionario vacío: memo = {}
     #   Esto asegura que todas las llamadas recursivas compartan el mismo dict.
+    if memo is None:
+        memo={}
 
     # PASO 2 – Validación de n (igual que en fib_recursivo).
-
-    # PASO 3 – Casos base: F(0) = 0, F(1) = 1.
-    #   Devuelve el valor directamente (no hace falta guardarlo en memo,
-    #   aunque tampoco es incorrecto hacerlo).
+    if n<0:
+        raise ValueError("Debe ser mayor o igual a 0")
 
     # PASO 4 – Revisión de caché.
     #   if n in memo: return memo[n]
     #   Si ya calculamos este valor antes, lo devolvemos sin recalcular.
+    if n in memo:
+        return memo[n]
 
+    # PASO 3 – Casos base: F(0) = 0, F(1) = 1.
+    #   Devuelve el valor directamente (no hace falta guardarlo en memo,
+    #   aunque tampoco es incorrecto hacerlo).
+    if n==0:
+        return 0
+    if n==1:
+        return 1
+    
     # PASO 5 – Caso recursivo con guardado.
     #   Calcula el resultado llamando recursivamente (igual que fib_recursivo),
     #   guárdalo en memo[n], y luego devuélvelo.
     #   En una sola línea: memo[n] = fib_memo(n-1, memo) + fib_memo(n-2, memo)
     #                      return memo[n]
-
-    pass  # TODO
-
+    memo[n]=fib_memo(n-1, memo)+fib_memo(n-2, memo)
+    return memo[n]
 
 def fib_bottom_up(n: int) -> int:
     """
@@ -145,26 +159,35 @@ def fib_bottom_up(n: int) -> int:
         ¿Necesitas guardar TODA la tabla, o solo los dos últimos valores?
     """
     # PASO 1 – Validación de n.
-
+    if n<0:
+        raise ValueError("Debe ser mayor o iguasl a 0")
+    
     # PASO 2 – Casos base especiales.
     #   Si n == 0, retorna 0. Si n == 1, retorna 1.
     #   Sin esto, el bucle de abajo tendría problemas con índices.
+    if n==0:
+        return 0
+    if n==1:
+        return 1
 
     # PASO 3 – Crea la tabla: una lista de n+1 ceros.
     #   tabla = [0] * (n + 1)
+    tabla=[0]*(n+1)
 
     # PASO 4 – Inicializa los casos base en la tabla.
     #   tabla[0] = 0   (aunque ya es 0 por defecto)
     #   tabla[1] = 1
+    tabla[0]=0
+    tabla[1]=1
 
     # PASO 5 – Bucle de llenado de izquierda a derecha.
     #   for i in range(2, n + 1):
     #       tabla[i] = tabla[i-1] + tabla[i-2]
+    for i in range(2, n+1):
+        tabla[i]=tabla[i-1]+tabla[i-2]
 
     # PASO 6 – Devuelve tabla[n].
-
-    pass  # TODO
-
+    return tabla[n]
 
 # ============================================================
 # PARTE 1B – ESCALANDO PELDAÑOS
@@ -208,17 +231,21 @@ def escaleras_recursivo(n: int) -> int:
     """
     # PASO 1 – Validación.
     #   Si n < 0, lanza ValueError.
-
+    if n<0:
+        raise ValueError("Debe ser mayor a 0")
+    
     # PASO 2 – Casos base.
     #   n == 0 → 1 (convención: una forma de no moverse)
     #   n == 1 → 1
     #   n == 2 → 2  (puedes dejarlo en el caso recursivo si tus casos base
     #               son n=0 y n=1; comprueba que funcione antes de omitirlo)
-
+    if n==0:
+        return 1
+    if n==1:
+        return 1
+    
     # PASO 3 – Caso recursivo: misma estructura que fib_recursivo.
-
-    pass  # TODO
-
+    return escaleras_recursivo(n-1)+ escaleras_recursivo(n-2)
 
 def escaleras_memo(n: int, memo: dict = None) -> int:
     """
@@ -231,9 +258,22 @@ def escaleras_memo(n: int, memo: dict = None) -> int:
     """
     # Sigue los mismos pasos que fib_memo:
     # inicializa memo → valida n → casos base → revisa caché → recursivo+guardado.
+    if memo is None:
+        memo={}
 
-    pass  # TODO
-
+    if n<0:
+        raise ValueError("Debe ser mayor a 0")
+    
+    if n in memo:
+        return memo[n]
+    
+    if n==0: 
+        return 1  
+    if n==1:
+        return 1
+    
+    memo[n]=escaleras_memo(n-1, memo)+escaleras_memo(n-2, memo)
+    return memo[n]
 
 def escaleras_bottom_up(n: int) -> int:
     """
@@ -247,8 +287,22 @@ def escaleras_bottom_up(n: int) -> int:
     """
     # Sigue la misma estructura que fib_bottom_up.
 
-    pass  # TODO
+    if n<0:
+        raise ValueError("Debe ser mayor a 0")
+    
+    if n==0:
+        return 1
+    if n==1:
+        return 1
+    
+    tabla=[0]*(n+1)
+    tabla[0]=1
+    tabla[1]=1
 
+    for i in range(2, n+1):
+        tabla[i]=tabla[i-1]+tabla[i-2]
+    
+    return tabla[n]
 
 # ============================================================
 # EXPERIMENTOS — ejecuta este bloque para ver resultados
@@ -295,3 +349,4 @@ if __name__ == "__main__":
         esc_n  = escaleras_bottom_up(n)
         print(f"  escaleras({n}) = {esc_n:4d}   fib({n+1}) = {fib_n1:4d}  "
               f"{'¿iguales?' if esc_n == fib_n1 else 'DISTINTOS'}")
+        
