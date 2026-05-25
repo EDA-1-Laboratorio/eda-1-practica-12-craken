@@ -105,37 +105,60 @@ def existe_camino(laberinto: list, fila: int, col: int,
     # PASO 1a – Verifica si (fila, col) está FUERA de los límites del laberinto.
     #   Condición: fila < 0 or fila >= filas or col < 0 or col >= cols
     #   Si se cumple, retorna False. Esta celda no existe.
+    
+    if fila<0 or fila>=filas:
+        return False
+    if col<0 or col>=cols:
+        return False
 
     # PASO 1b – Verifica si la celda es una PARED.
     #   if laberinto[fila][col] == 1: return False
+    if laberinto[fila][col] == 1:
+        return False
 
     # PASO 1c – Verifica si la celda ya fue VISITADA.
     #   if (fila, col) in visitados: return False
     #   Esto evita ciclos infinitos (por ejemplo, ir y volver entre dos celdas).
+    if (fila, col) in visitados:
+        return False
 
     # PASO 1d – Verifica si llegamos a la SALIDA.
     #   La salida es la esquina inferior derecha: (filas-1, cols-1).
     #   Si fila == filas-1 and col == cols-1:
     #       agrega (fila, col) a ruta y retorna True.
+    if fila == filas-1 and col == cols-1:
+        ruta.append((fila, col))
+        return True
 
     # PASO 2 – Marca la celda como visitada.
     #   visitados.add((fila, col))
     #   ruta.append((fila, col))
+    visitados.add((fila, col))
+    ruta.append((fila,col))
 
     # PASO 3 – Explora recursivamente los cuatro vecinos.
-    #   Define las cuatro direcciones: abajo (1,0), derecha (0,1),
-    #                                   arriba (-1,0), izquierda (0,-1).
+    #   Define las cuatro direcciones: abajo (1,0), derecha (0,1), arriba (-1,0), izquierda (0,-1).
     #   Para cada dirección (df, dc):
     #       nueva_fila = fila + df
     #       nueva_col  = col + dc
     #       if existe_camino(laberinto, nueva_fila, nueva_col, visitados, ruta):
     #           return True   ← propagamos el éxito hacia arriba
+    direcciones = {(1,0), (-1,0), (0,-1,), ( 0, 1)}
+    for direccion in direcciones:
+         nueva_fila = fila + direccion[0]
+         nueva_col = col + direccion[1]
+         if existe_camino(laberinto, nueva_fila, nueva_col, visitados, ruta):
+             return True
+             
 
     # PASO 4 – BACKTRACK: ningún vecino condujo a la salida.
     #   Desmarca la celda:
     #       visitados.discard((fila, col))
     #       ruta.pop()
     #   Retorna False.
+    visitados.discard((fila,col))
+    ruta.pop()
+    return False
 
     pass  # TODO
 
@@ -182,16 +205,36 @@ def imprimir_laberinto(laberinto: list, visitados: set,
     filas = len(laberinto)
     cols  = len(laberinto[0])
     ruta_set = set(ruta)  # conversión a set para búsqueda O(1)
-
+    print ("----Paso {paso}---")
+    
     # PASO 1 – Imprime el encabezado del paso.
     #   print(f"\n--- Paso {paso} ---")
 
     # PASO 2 – Recorre las filas y columnas.
     #   Para cada celda, determina el símbolo según la prioridad definida arriba.
     #   Imprime cada fila como una cadena con los símbolos separados por espacios.
+    for fila in laberinto:
+        cadena = ""
+        for columna in fila:
+            if (fila, columna) == (0,0):
+                cadena.append("S")
+                continue
+            if (fila, columna) == (filas-1, cols-1):
+                cadena.append("E")
+                continue
+            if (fila, columna) in ruta:
+                cadena.append("·")
+                continue
+            if (fila, columna) in visitados:
+                cadena.append("*")
+                continue
+
+            if laberinto[fila][columna] == 1:
+                cadena.append("#")
+            else:
+                cadena.append(".")
 
     pass  # TODO
-
 
 def encontrar_camino(laberinto: list, verbose: bool = False) -> list | None:
     """
@@ -224,6 +267,9 @@ def encontrar_camino(laberinto: list, verbose: bool = False) -> list | None:
 
     # Llama a existe_camino desde la posición inicial (0, 0).
     # Si retorna True, devuelve 'ruta'. Si False, devuelve None.
+    if existe_camino(laberinto, 0,0, visitados,ruta):
+        return ruta
+    return None
 
     pass  # TODO
 
@@ -281,12 +327,21 @@ def contar_caminos(laberinto: list, fila: int, col: int,
     cols  = len(laberinto[0])
 
     # PASO 1a – Fuera de límites → return 0
+    if (fila >= filas) or (0>fila):
+        return 0
+    if (col >= cols) or (0>col):
+        return 0
 
     # PASO 1b – Pared → return 0
+    if laberinto[fila][col] == 1:
+        return 0
 
     # PASO 1c – Ya visitada → return 0
+    if (fila, col) in visitados:
+        return 0
 
     # PASO 2 – Marca como visitada.
+    visitados.add((fila,col))
 
     # PASO 3 – ¿Llegamos a la salida?
     #   if fila == filas-1 and col == cols-1:
@@ -295,12 +350,21 @@ def contar_caminos(laberinto: list, fila: int, col: int,
     #       cantidad = 0
     #       for df, dc in [(1,0), (0,1), (-1,0), (0,-1)]:
     #           cantidad += contar_caminos(laberinto, fila+df, col+dc, visitados)
+    if fila == filas-1 and col == cols-1:
+        cantidad = 1
+    else:
+        cantidad = 0
+        for df, dc in [(1,0), (0,1), (-1,0), (0,-1)]:
+            cantidad += contar_caminos(laberinto, fila+df, col+dc, visitados)
+
 
     # PASO 4 – SIEMPRE backtrack: visitados.discard((fila, col))
     #   A diferencia de existe_camino, aquí NO tenemos 'ruta', así que
     #   el backtrack es solo quitar del conjunto 'visitados'.
+    visitados.discard((fila,col))
 
     # PASO 5 – return cantidad
+    return cantidad
 
     pass  # TODO
 

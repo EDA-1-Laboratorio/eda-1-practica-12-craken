@@ -11,7 +11,6 @@ Instrucciones generales
 Ejecuta este archivo directamente para ver los resultados:
     python3 n_reinas.py
 """
-
 import time
 
 # ============================================================
@@ -81,7 +80,15 @@ def es_valida(tablero: list) -> bool:
     """
     n = len(tablero)
 
-    # PASO 1 – Doble bucle sobre todos los pares (i, j) con i < j.
+    for i in range(n):
+        for j in range(i + 1, n):
+
+            # misma columna o diagonal
+            if tablero[i] == tablero[j] or abs(tablero[i] - tablero[j]) == abs(i - j):
+                return False
+
+    return True
+# PASO 1 – Doble bucle sobre todos los pares (i, j) con i < j.
 
     # PASO 2 – Verifica las dos condiciones de conflicto.
     #   Condición columna:  tablero[i] == tablero[j]
@@ -136,7 +143,12 @@ def es_segura(tablero: list, fila: int, col: int) -> bool:
         garantiza que solo hay una reina por fila.
     """
     # Itera sobre las filas anteriores (0 a fila-1) y verifica conflictos.
+    for i in range(fila):
 
+        if tablero[i] == col or abs(tablero[i] - col) == abs(i - fila):
+            return False
+
+    return True
     pass  # TODO
 
 
@@ -160,6 +172,7 @@ def es_segura(tablero: list, fila: int, col: int) -> bool:
 #
 #   La PODA ocurre cuando es_segura retorna False: no exploramos esa
 #   rama ni ninguna de sus subramas. Esto reduce enormemente el espacio.
+
 
 def resolver_n_reinas(n: int, fila: int = 0,
                       tablero: list = None) -> list | None:
@@ -194,18 +207,30 @@ def resolver_n_reinas(n: int, fila: int = 0,
         La primera llamada es: resolver_n_reinas(n, 0, [-1]*n)
     """
     # PASO 1 – Inicialización del tablero (solo en la primera llamada).
-    #   if tablero is None: tablero = [-1] * n
-
+    if tablero is None:
+        tablero = [-1] * n
     # PASO 2 – Caso base de éxito.
-    #   if fila == n: return tablero.copy()
-
+    if fila == n:
+        return tablero.copy()
     # PASO 3 – Caso recursivo: prueba cada columna de 0 a n-1.
     #   Para cada col, verifica es_segura → coloca → recursa → backtrack.
+    for col in range(n):
 
+        if es_segura(tablero, fila, col):
+
+            tablero[fila] = col
+
+            resultado = resolver_n_reinas(n, fila + 1, tablero)
+
+            if resultado is not None:
+                return resultado
+
+            tablero[fila] = -1
+
+    return None
     # PASO 4 – Si ninguna columna funcionó, retorna None.
 
     pass  # TODO
-
 
 def imprimir_tablero(tablero: list, titulo: str = "Tablero") -> None:
     """
@@ -229,12 +254,20 @@ def imprimir_tablero(tablero: list, titulo: str = "Tablero") -> None:
         Separa las celdas con espacios.
     """
     n = len(tablero)
+
     print(f"\n{titulo}:")
     # Para cada fila, construye una cadena con 'Q' en la columna correspondiente.
     # Usa " ".join(...) para separar con espacios.
+    for i in range(n):
 
-    pass  # TODO
+        for j in range(n):
 
+            if tablero[i] == j:
+                print("Q", end=" ")
+            else:
+                print(".", end=" ")
+
+        print()
 
 # ============================================================
 # PARTE 4D – CONTAR TODAS LAS SOLUCIONES
@@ -244,7 +277,6 @@ def imprimir_tablero(tablero: list, titulo: str = "Tablero") -> None:
 #   - En lugar de retornar la primera solución, CONTAMOS cada éxito.
 #   - NUNCA retornamos al encontrar una solución; seguimos explorando.
 #   - Siempre hacemos backtrack (tablero[fila] = -1) al terminar cada rama.
-
 def contar_soluciones(n: int, fila: int = 0,
                       tablero: list = None) -> int:
     """
@@ -271,14 +303,26 @@ def contar_soluciones(n: int, fila: int = 0,
         sino que ACUMULAMOS el conteo de todas las ramas.
     """
     # PASO 1 – Inicialización del tablero.
-    #   if tablero is None: tablero = [-1] * n
-
+    if tablero is None:
+        tablero = [-1] * n
     # PASO 2 – Caso base.
-    #   if fila == n: return 1
-
+    if fila == n:
+        return 1
     # PASO 3 – Caso recursivo: itera columnas, acumula count.
+    count = 0
 
-    # PASO 4 – return count
+    for col in range(n):
+
+        if es_segura(tablero, fila, col):
+
+            tablero[fila] = col
+
+            count += contar_soluciones(n, fila + 1, tablero)
+
+            tablero[fila] = -1
+
+    return count
+# PASO 4 – return count
 
     pass  # TODO
 
@@ -287,17 +331,23 @@ def contar_soluciones(n: int, fila: int = 0,
 # PARTE 4E – ANÁLISIS DE COMPLEJIDAD
 # ============================================================
 
+
 def medir(funcion, *args, repeticiones: int = 3):
     """Ejecuta funcion(*args) 'repeticiones' veces. Retorna (resultado, t_promedio)."""
     tiempos = []
     resultado = None
-    for _ in range(repeticiones):
-        inicio = time.perf_counter()
-        resultado = funcion(*args)
-        fin = time.perf_counter()
-        tiempos.append(fin - inicio)
-    return resultado, sum(tiempos) / len(tiempos)
 
+    for _ in range(repeticiones):
+
+        inicio = time.perf_counter()
+
+        resultado = funcion(*args)
+
+        fin = time.perf_counter()
+
+        tiempos.append(fin - inicio)
+
+    return resultado, sum(tiempos) / len(tiempos)
 
 # ============================================================
 # EXPERIMENTOS
